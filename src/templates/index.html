@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CTF Tool</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>CTF Tool</h1>
+    <div class="status">
+      <span id="logic-dot" class="dot"></span>
+      <span id="logic-status">checking logic server...</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>New calculation</h2>
+      <form id="calc-form">
+        <label>
+          Algorithm
+          <select id="algo"></select>
+        </label>
+
+        <label>
+          Input
+          <textarea id="input" rows="5" placeholder="paste the encoded string here"></textarea>
+        </label>
+
+        <div class="row">
+          <label id="keylen-wrap">
+            Key length
+            <input id="keylen" type="number" min="1" max="3" value="1">
+          </label>
+          <label>
+            Flags
+            <input id="flags" type="number" min="0" value="0">
+          </label>
+        </div>
+
+        <button type="submit">Run</button>
+        <span id="form-error" class="error"></span>
+      </form>
+      <p id="algo-desc" class="muted"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Jobs</h2>
+      <div id="jobs" class="jobs"></div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
