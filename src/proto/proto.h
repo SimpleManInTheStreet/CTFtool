@@ -78,7 +78,10 @@ typedef enum {
     PROTO_TAG_MESSAGE  = 9, /* bytes   plain UTF-8 message            */
     PROTO_TAG_VERSION  = 10,/* uint32  protocol version               */
     PROTO_TAG_ALGO_NAME = 11,/* bytes  algorithm name                 */
-    PROTO_TAG_ALGO_DESC = 12 /* bytes  algorithm description          */
+    PROTO_TAG_ALGO_DESC = 12,/* bytes  algorithm description          */
+    PROTO_TAG_HASH      = 13,/* bytes  hash function name (e.g. md5)   */
+    PROTO_TAG_ALPHABET  = 14,/* bytes  custom candidate alphabet       */
+    PROTO_TAG_LENGTH    = 15 /* uint32 candidate word length           */
 } proto_tag_t;
 
 typedef enum {

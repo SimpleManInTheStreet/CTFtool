@@ -800,7 +800,10 @@ static void api_calc(web_server_t *s, int fd, const char *body, size_t body_len)
     char algo_name[64];
     buf_t input;
     buf_init(&input);
-    long keylen = 1, flags = 0;
+    char hash_name[32] = { 0 };
+    buf_t alphabet;
+    buf_init(&alphabet);
+    long keylen = 1, flags = 0, word_len = 0;
     int have_algo = 0, have_input = 0;
 
     const char *v = json_find(body, "algo");
@@ -825,6 +828,26 @@ static void api_calc(web_server_t *s, int fd, const char *body, size_t body_len)
     v = json_find(body, "flags");
     if (v && isdigit((unsigned char)*v))
         flags = strtol(v, NULL, 10);
+
+    /* Hash brute force extras.  The alphabet is forwarded verbatim so the
+     * logic server always receives exactly what the caller typed. */
+    v = json_find(body, "hash");
+    if (v && *v == '"') {
+        buf_t tmp;
+        buf_init(&tmp);
+        if (json_parse_string(&v, &tmp) == 0)
+            snprintf(hash_name, sizeof hash_name, "%.*s", (int)tmp.len,
+                     (const char *)tmp.data);
+        buf_free(&tmp);
+    }
+    v = json_find(body, "alphabet");
+    if (v && *v == '"')
+        json_parse_string(&v, &alphabet);
+    v = json_find(body, "length");
+    if (!v)
+        v = json_find(body, "word_len");
+    if (v && isdigit((unsigned char)*v))
+        word_len = strtol(v, NULL, 10);
 
     if (!have_algo || !have_input) {
         buf_append_str(&err, "{\"error\":\"missing 'algo' or 'input'\"}");
@@ -869,6 +892,13 @@ static void api_calc(web_server_t *s, int fd, const char *body, size_t body_len)
     proto_add(req, PROTO_TAG_INPUT, input.data, (uint32_t)input.len);
     proto_add_u32(req, PROTO_TAG_KEY_LEN, (uint32_t)keylen);
     proto_add_u32(req, PROTO_TAG_FLAGS, (uint32_t)flags);
+    if (hash_name[0])
+        proto_add_str(req, PROTO_TAG_HASH, hash_name);
+    if (alphabet.len)
+        proto_add(req, PROTO_TAG_ALPHABET, alphabet.data,
+                  (uint32_t)alphabet.len);
+    if (word_len > 0)
+        proto_add_u32(req, PROTO_TAG_LENGTH, (uint32_t)word_len);
 
     if (logic_send(s, req) != 0) {
         proto_msg_free(req);
@@ -889,6 +919,7 @@ static void api_calc(web_server_t *s, int fd, const char *body, size_t body_len)
 
 out:
     buf_free(&input);
+    buf_free(&alphabet);
     buf_free(&err);
 }
 

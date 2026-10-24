@@ -151,6 +151,12 @@ static void process_job(logic_server_t *srv, job_t *job)
     uint32_t in_len = 0;
     const void *in = proto_get(req, PROTO_TAG_INPUT, &in_len);
 
+    uint32_t word_len = 0;
+    proto_get_u32(req, PROTO_TAG_LENGTH, &word_len);
+    uint32_t alphabet_len = 0;
+    const void *alphabet = proto_get(req, PROTO_TAG_ALPHABET, &alphabet_len);
+    const char *hash_name = proto_get_str(req, PROTO_TAG_HASH);
+
     proto_msg_t *res = proto_msg_new(PROTO_CALC_RES);
     if (!res)
         goto cleanup;
@@ -178,6 +184,10 @@ static void process_job(logic_server_t *srv, job_t *job)
         .input_len = in_len,
         .key_len = key_len,
         .flags = flags,
+        .hash = hash_name,
+        .alphabet = alphabet,
+        .alphabet_len = alphabet_len,
+        .word_len = word_len,
     };
 
     buf_t out;

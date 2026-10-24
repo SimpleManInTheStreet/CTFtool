@@ -40,6 +40,33 @@
           </label>
         </div>
 
+        <div class="row" id="hash-row" style="display:none">
+          <label id="hash-wrap">
+            Hash function
+            <select id="hash-func">
+              <option value="md5">MD5</option>
+              <option value="sha1">SHA-1</option>
+              <option value="sha256" selected>SHA-256</option>
+            </select>
+          </label>
+          <label id="wordlen-wrap">
+            Word length
+            <input id="wordlen" type="number" min="1" max="16" value="4">
+          </label>
+        </div>
+
+        <div class="row" id="alphabet-row" style="display:none">
+          <label id="alphabet-wrap">
+            Alphabet
+            <input id="alphabet" type="text" spellcheck="false"
+                   autocomplete="off" placeholder="characters to try">
+          </label>
+          <label id="alphabet-preset-wrap">
+            Preset
+            <select id="alphabet-preset"></select>
+          </label>
+        </div>
+
         <button type="submit">Run</button>
         <span id="form-error" class="error"></span>
       </form>

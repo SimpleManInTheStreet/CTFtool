@@ -54,6 +54,12 @@
 /* Longest key the XOR brute forcer will attempt. */
 #define CTF_XOR_MAX_KEYLEN   3
 
+/* Hash brute force: longest candidate word and largest search space.
+ * The space limit keeps an accidental huge request from tying up a worker
+ * effectively forever; alphabet_len ^ word_len must stay below it. */
+#define CTF_HASH_MAX_WORDLEN 16u
+#define CTF_HASH_MAX_SPACE   (1000ull * 1000ull * 1000ull) /* 1e9 */
+
 /* ------------------------------------------------------------------ */
 /* Logic server                                                        */
 /* ------------------------------------------------------------------ */
@@ -62,6 +68,8 @@
 #define CTF_LOGIC_WORKERS    4
 /* Number of worker threads used *inside* a single heavy brute force. */
 #define CTF_XOR_INNER_THREADS 4
+/* Threads used inside one hash brute force job. */
+#define CTF_HASH_INNER_THREADS 4
 
 /* How long a finished job stays queryable from the web layer (ms). */
 #define CTF_JOB_TTL_MS       (10u * 60u * 1000u)

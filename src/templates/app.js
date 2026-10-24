@@ -13,6 +13,12 @@
     keylen: document.getElementById("keylen"),
     keylenWrap: document.getElementById("keylen-wrap"),
     flags: document.getElementById("flags"),
+    hashRow: document.getElementById("hash-row"),
+    hashFunc: document.getElementById("hash-func"),
+    wordlen: document.getElementById("wordlen"),
+    alphabetRow: document.getElementById("alphabet-row"),
+    alphabet: document.getElementById("alphabet"),
+    alphabetPreset: document.getElementById("alphabet-preset"),
     error: document.getElementById("form-error"),
     desc: document.getElementById("algo-desc"),
     jobs: document.getElementById("jobs"),
@@ -20,6 +26,42 @@
     status: document.getElementById("logic-status"),
     submit: document.querySelector("#calc-form button"),
   };
+
+  // Alphabet templates offered in the UI.  The selected value is copied into
+  // the alphabet field, which the user may then edit freely; the exact string
+  // is what gets sent to the server.
+  const ALPHABET_PRESETS = [
+    { label: "custom", value: "" },
+    { label: "lowercase a-z", value: "abcdefghijklmnopqrstuvwxyz" },
+    { label: "uppercase A-Z", value: "ABCDEFGHIJKLMNOPQRSTUVWXYZ" },
+    {
+      label: "letters",
+      value: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    },
+    { label: "digits 0-9", value: "0123456789" },
+    { label: "hex lowercase", value: "0123456789abcdef" },
+    { label: "hex uppercase", value: "0123456789ABCDEF" },
+    {
+      label: "lowercase + digits",
+      value: "abcdefghijklmnopqrstuvwxyz0123456789",
+    },
+    {
+      label: "alphanumeric",
+      value: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+    },
+    {
+      label: "printable ASCII",
+      value:
+        "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+    },
+  ];
+
+  for (const preset of ALPHABET_PRESETS) {
+    const opt = document.createElement("option");
+    opt.value = preset.value;
+    opt.textContent = preset.label;
+    el.alphabetPreset.appendChild(opt);
+  }
 
   async function getJSON(url, options) {
     const res = await fetch(url, options);
@@ -58,9 +100,27 @@
     el.desc.textContent = a ? a.description : "";
     // key length is only meaningful for the XOR brute forcer
     el.keylenWrap.style.display = a && a.name === "xor_brute" ? "" : "none";
+    // hash brute takes a different set of parameters (hash/wordlen/alphabet)
+    const isHash = a && a.name === "hash_brute";
+    el.hashRow.style.display = isHash ? "" : "none";
+    el.alphabetRow.style.display = isHash ? "" : "none";
+    if (isHash) {
+      el.input.placeholder = "hash digest to crack (hex, e.g. 5d41402a...)";
+    } else if (a && (a.name === "base64_decode" || a.name === "hex_decode")) {
+      el.input.placeholder = "paste the encoded string here";
+    } else {
+      el.input.placeholder = "paste the encoded string here";
+    }
   }
 
   el.algo.addEventListener("change", updateAlgoUI);
+
+  el.alphabetPreset.addEventListener("change", () => {
+    if (el.alphabetPreset.value !== "") {
+      el.alphabet.value = el.alphabetPreset.value;
+      el.alphabetPreset.value = "";
+    }
+  });
 
   // ---- job rendering ---------------------------------------------
 
@@ -115,6 +175,12 @@
       flags: parseInt(el.flags.value || "0", 10),
       input: input,
     };
+
+    if (algo === "hash_brute") {
+      payload.hash = el.hashFunc.value;
+      payload.length = parseInt(el.wordlen.value || "0", 10);
+      payload.alphabet = el.alphabet.value;
+    }
 
     el.submit.disabled = true;
     const { ok, status, data } = await getJSON("/api/calc", {

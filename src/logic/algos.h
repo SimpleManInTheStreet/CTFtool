@@ -20,6 +20,13 @@ typedef struct {
     size_t         input_len;
     uint32_t       key_len;  /* algorithm specific, e.g. XOR key length */
     uint32_t       flags;    /* algorithm specific bit flags            */
+
+    /* Hash brute force parameters.  The alphabet is always the exact set
+     * of bytes supplied by the caller (never expanded server side). */
+    const char    *hash;         /* "md5", "sha1", "sha256"             */
+    const uint8_t *alphabet;
+    size_t         alphabet_len;
+    uint32_t       word_len;     /* length of the candidate password    */
 } algo_params_t;
 
 typedef struct {
